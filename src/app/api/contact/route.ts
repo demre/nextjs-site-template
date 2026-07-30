@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   if (!rateLimit.success) {
     return NextResponse.json(
       { error: "Too many requests. Please try again later." },
-      { status: 429 }
+      { status: 429 },
     );
   }
 
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Invalid form submission." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   if (!turnstileResult.success) {
     return NextResponse.json(
       { error: "Bot verification failed. Please try again." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
   if (error) {
     return NextResponse.json(
       { error: "Failed to send message. Please try again." },
-      { status: 502 }
+      { status: 502 },
     );
   }
 

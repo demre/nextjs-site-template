@@ -4,10 +4,7 @@ const VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 // Turnstile is optional: if no secret key is configured, verification
 // is skipped (useful for local dev without a Cloudflare site set up).
-export async function verifyTurnstileToken(
-  token: string,
-  remoteIp?: string
-) {
+export async function verifyTurnstileToken(token: string, remoteIp?: string) {
   if (!env.TURNSTILE_SECRET_KEY) {
     return { success: true as const };
   }

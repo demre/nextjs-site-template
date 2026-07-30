@@ -48,8 +48,7 @@ export default function ContactNotificationEmail({
 
 const main = {
   backgroundColor: "#f6f6f6",
-  fontFamily:
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
+  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
 };
 
 const container = {

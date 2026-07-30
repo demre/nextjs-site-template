@@ -15,7 +15,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { TurnstileWidget } from "@/components/turnstile-widget";
-import { contactFormSchema, type ContactFormValues } from "@/lib/schemas/contact";
+import {
+  contactFormSchema,
+  type ContactFormValues,
+} from "@/lib/schemas/contact";
 
 const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
@@ -23,7 +26,13 @@ export function ContactForm() {
   const [submitting, setSubmitting] = useState(false);
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
-    defaultValues: { name: "", email: "", message: "", company: "", turnstileToken: "" },
+    defaultValues: {
+      name: "",
+      email: "",
+      message: "",
+      company: "",
+      turnstileToken: "",
+    },
   });
 
   async function onSubmit(values: ContactFormValues) {
