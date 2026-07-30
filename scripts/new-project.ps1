@@ -67,6 +67,21 @@ if (-not (Test-Path (Join-Path $projectPath "node_modules"))) {
 }
 Write-Host "==> Dependencies installed." -ForegroundColor Green
 
+# create-next-app installs dependencies before it git-initializes the new
+# project, so husky's "prepare" script silently fails to register the
+# pre-commit hook (no .git yet at install time). Re-run it now that the
+# repo exists so pre-commit hooks actually work.
+if (Test-Path (Join-Path $projectPath "node_modules\.bin\husky.cmd")) {
+    Push-Location $projectPath
+    try {
+        npx husky
+        Write-Host "==> Re-registered husky pre-commit hook." -ForegroundColor Green
+    }
+    finally {
+        Pop-Location
+    }
+}
+
 Push-Location $projectPath
 try {
     # --- 3. Prompt for project-specific secrets -----------------------------
