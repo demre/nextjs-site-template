@@ -7,11 +7,14 @@
   1. Prompts for the new project name (or accepts -ProjectName).
   2. Runs `npx create-next-app@latest <name> -e <template repo>`, which clones
      the template and runs `npm install` automatically.
-  3. Prompts for project-specific secrets (Resend, Turnstile, Upstash).
-  4. Writes those values into <project>/.env.local only - never into
+  3. Prompts for site details (name, description, phone) and project-specific
+     secrets (Resend, Turnstile, Upstash).
+  4. Writes the secrets into <project>/.env.local only - never into
      .env.example or any other committed file.
-  5. Renames the "name" field in package.json to match the project name.
-  6. Runs `npm run dev` so you land on a working local dev server.
+  5. Writes the site details into <project>/src/config/site.ts, which drives
+     page titles, share previews, the sitemap and search-engine metadata.
+  6. Renames the "name" field in package.json to match the project name.
+  7. Runs `npm run dev` so you land on a working local dev server.
 
 .PARAMETER ProjectName
   Optional. If omitted, you will be prompted for it.
@@ -36,6 +39,30 @@ function Read-OptionalSecret {
     param([string]$Prompt)
     $value = Read-Host $Prompt
     return $value
+}
+
+# Escape a user-supplied string for embedding in a TypeScript double-quoted literal.
+function ConvertTo-TsString {
+    param([string]$Value)
+    return $Value.Replace('\', '\\').Replace('"', '\"')
+}
+
+# Replace a value in src/config/site.ts, anchored to its trailing
+# "// @scaffold:<marker>" comment so no other key can accidentally match.
+function Set-SiteConfigValue {
+    param(
+        [string]$Content,
+        [string]$Marker,
+        [string]$Value
+    )
+    $pattern = '(?m)^(\s*\w+:\s*)"[^"]*"(,\s*//\s*@scaffold:' + [regex]::Escape($Marker) + ')\s*$'
+    # '$' is the substitution marker in .NET replacement strings; '$$' emits a literal one.
+    $replacement = '${1}"' + (ConvertTo-TsString $Value).Replace('$', '$$') + '"${2}'
+    if ($Content -notmatch $pattern) {
+        Write-Warning "Could not find the '@scaffold:$Marker' marker in src/config/site.ts - skipping."
+        return $Content
+    }
+    return [regex]::Replace($Content, $pattern, $replacement)
 }
 
 # --- 1. Project name -------------------------------------------------------
@@ -91,6 +118,11 @@ try {
     $siteUrl = Read-Host "Site URL [http://localhost:3000]"
     if (-not $siteUrl) { $siteUrl = "http://localhost:3000" }
 
+    $siteName = Read-Host "Site / business name (used in titles, share previews and search results)"
+    if (-not $siteName) { $siteName = $ProjectName }
+    $siteDescription = Read-OptionalSecret "One-sentence description of the business (shown in search results)"
+    $businessPhone   = Read-OptionalSecret "Business phone number (optional)"
+
     $resendApiKey   = Read-OptionalSecret "Resend API key"
     $contactTo      = Read-OptionalSecret "Contact form 'send to' email address"
     $contactFrom    = Read-OptionalSecret "Contact form 'from' email address (e.g. onboarding@resend.dev)"
@@ -121,14 +153,43 @@ UPSTASH_REDIS_REST_TOKEN=$upstashToken
     Set-Content -Path $envLocalPath -Value $envContent -Encoding utf8
     Write-Host "==> Wrote $envLocalPath" -ForegroundColor Green
 
-    # --- 5. Rename package.json "name" field ---------------------------------
+    # --- 5. Fill in src/config/site.ts (SEO single source of truth) ----------
+    $siteConfigPath = Join-Path $projectPath "src\config\site.ts"
+    if (Test-Path $siteConfigPath) {
+        $siteConfigContent = Get-Content $siteConfigPath -Raw
+        $siteConfigContent = Set-SiteConfigValue -Content $siteConfigContent -Marker "name" -Value $siteName
+        if ($siteDescription) {
+            $siteConfigContent = Set-SiteConfigValue -Content $siteConfigContent -Marker "description" -Value $siteDescription
+        }
+        else {
+            # The description is the summary line Google shows under the site name -
+            # shipping the placeholder would be visible to the public.
+            Write-Warning "No description given. src/config/site.ts still has placeholder text that would appear in Google search results - edit it before going live."
+        }
+        if ($businessPhone) {
+            $siteConfigContent = Set-SiteConfigValue -Content $siteConfigContent -Marker "telephone" -Value $businessPhone
+        }
+        Set-Content -Path $siteConfigPath -Value $siteConfigContent -Encoding utf8 -NoNewline
+        Write-Host "==> Wrote site details to src/config/site.ts" -ForegroundColor Green
+    }
+    else {
+        Write-Warning "src/config/site.ts not found - skipping site configuration."
+    }
+
+    # --- 6. Rename package.json "name" field ---------------------------------
     $pkgPath = Join-Path $projectPath "package.json"
     $pkg = Get-Content $pkgPath -Raw | ConvertFrom-Json
     $pkg.name = $ProjectName.ToLower()
     ($pkg | ConvertTo-Json -Depth 100) | Set-Content -Path $pkgPath -Encoding utf8
     Write-Host "==> Set package.json name to '$($pkg.name)'" -ForegroundColor Green
 
-    # --- 6. Launch dev server --------------------------------------------------
+    # --- 7. Launch dev server --------------------------------------------------
+    Write-Host ""
+    Write-Host "Next step for search engines: open src/config/site.ts and fill in the" -ForegroundColor Yellow
+    Write-Host "'business' block (address, opening hours, social profile links)." -ForegroundColor Yellow
+    Write-Host "With an address filled in, the site publishes LocalBusiness data that" -ForegroundColor Yellow
+    Write-Host "Google can use for local results; without one it falls back to a generic" -ForegroundColor Yellow
+    Write-Host "Organization listing." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "==> Starting dev server. Press Ctrl+C to stop." -ForegroundColor Cyan
     npm run dev

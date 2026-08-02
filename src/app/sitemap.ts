@@ -1,20 +1,15 @@
 import type { MetadataRoute } from "next";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+import { siteConfig } from "@/config/site";
 
-  return [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: "yearly",
-      priority: 0.5,
-    },
-  ];
+export default function sitemap(): MetadataRoute.Sitemap {
+  // Routes live in src/config/site.ts so adding a page can't silently omit it
+  // from the sitemap. The URL comes from the validated env, so a misconfigured
+  // deploy fails the build instead of publishing localhost URLs.
+  return siteConfig.routes.map((route) => ({
+    url: new URL(route.path, siteConfig.url).toString(),
+    lastModified: new Date(),
+    changeFrequency: route.changeFrequency,
+    priority: route.priority,
+  }));
 }

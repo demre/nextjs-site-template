@@ -2,9 +2,21 @@ import type { Metadata } from "next";
 
 import { ContactForm } from "@/components/contact-form";
 
+const title = "Contact";
+const description = "Get in touch with us.";
+
 export const metadata: Metadata = {
-  title: "Contact",
-  description: "Get in touch with us.",
+  title,
+  description,
+  alternates: {
+    canonical: "/contact",
+  },
+  openGraph: {
+    type: "website",
+    url: "/contact",
+    title,
+    description,
+  },
 };
 
 export default function ContactPage() {
