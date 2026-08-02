@@ -8,6 +8,7 @@ import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provi
 import { StructuredData } from "@/components/structured-data";
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/config/site";
+import { env } from "@/lib/env";
 import { businessJsonLd, websiteJsonLd } from "@/lib/structured-data";
 
 const geistSans = Geist({
@@ -69,6 +70,9 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
+  ...(env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } }
+    : {}),
 };
 
 export const viewport: Viewport = {

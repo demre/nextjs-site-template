@@ -22,6 +22,9 @@ export const env = createEnv({
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: emptyToUndefined.pipe(
       z.string().optional(),
     ),
+    NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: emptyToUndefined.pipe(
+      z.string().optional(),
+    ),
   },
   runtimeEnv: {
     RESEND_API_KEY: process.env.RESEND_API_KEY,
@@ -32,5 +35,7 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+    NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION:
+      process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
 });

@@ -581,7 +581,7 @@
         <div class="card">
           <span class="icon">🔍</span>
           <h4>Search-engine setup</h4>
-          <p>Page titles, search-result descriptions, the sitemap Google reads, and the preview card that appears when someone shares a link on WhatsApp or LinkedIn — all generated from one file, <code>src/config/site.ts</code>. Fill in your business address there and the site also tells Google where you are.</p>
+          <p>Page titles, search-result descriptions, the sitemap Google reads, the breadcrumb trail on nested pages, and the preview card that appears when someone shares a link on WhatsApp or LinkedIn — all generated from one file, <code>src/config/site.ts</code>. Fill in your business address there and the site also tells Google where you are.</p>
         </div>
         <div class="card">
           <span class="icon">📈</span>
@@ -1041,6 +1041,7 @@ Invoke-WebRequest -Uri &quot;https://raw.githubusercontent.com/demre/nextjs-site
             <tr><td><code>src/app/page.tsx</code></td><td>The website's homepage content.</td></tr>
             <tr><td><code>src/app/contact/page.tsx</code></td><td>The contact page.</td></tr>
             <tr><td><code>src/app/sitemap.ts</code></td><td>The map of your pages that search engines read. It builds itself from the page list in <code>src/config/site.ts</code> — when you add a page, add it there too.</td></tr>
+            <tr><td><code>src/components/breadcrumbs.tsx</code></td><td>The "Home / Contact"-style trail shown near the top of nested pages. Also tells Google the page's place in the site structure.</td></tr>
             <tr><td><code>src/components</code></td><td>Reusable pieces — buttons, cards, forms — used to build pages.</td></tr>
             <tr><td><code>emails</code></td><td>What the notification email looks like when someone submits the contact form.</td></tr>
             <tr><td><code>public</code></td><td>Images, icons, and other files served as-is.</td></tr>
@@ -1086,7 +1087,7 @@ Invoke-WebRequest -Uri &quot;https://raw.githubusercontent.com/demre/nextjs-site
         <li><span class="box"></span><span class="txt"><strong>Re-enter your keys in Vercel's dashboard</strong><span>Under Project Settings → Environment Variables — copy the same names and values from your local <code>.env.local</code>. This step exists because <code>.env.local</code> intentionally never leaves your computer.</span></span></li>
         <li><span class="box"></span><span class="txt"><strong>Point your domain at Vercel</strong><span>Add your domain in Vercel's dashboard and update its DNS records as instructed. If you use both <code>www.yoursite.com</code> and <code>yoursite.com</code>, set one as the primary and let Vercel redirect the other — otherwise search engines treat them as two competing copies of the same site.</span></span></li>
         <li><span class="box"></span><span class="txt"><strong>Set <code>NEXT_PUBLIC_SITE_URL</code> to the real domain</strong><span>In Vercel's Environment Variables, change it from <code>http://localhost:3000</code> to your live address, e.g. <code>https://yoursite.com</code>. Every link Google reads — the sitemap, the "official address" of each page, the image on shared link previews — is built from this value. Leave it pointing at localhost and search engines get a site full of dead links. The build will refuse to run if it's missing entirely.</span></span></li>
-        <li><span class="box"></span><span class="txt"><strong>Once live, submit the site to Google</strong><span>Create a free Google Search Console account, verify the domain, and submit <code>https://yoursite.com/sitemap.xml</code>. This is what gets the site indexed in days rather than weeks.</span></span></li>
+        <li><span class="box"></span><span class="txt"><strong>Once live, submit the site to Google</strong><span>Create a free Google Search Console account, verify the domain, and submit <code>https://yoursite.com/sitemap.xml</code>. This is what gets the site indexed in days rather than weeks. The easiest way to verify: choose the "HTML tag" method, copy the <code>content="..."</code> value it gives you, and paste it into <code>NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION</code> in Vercel's Environment Variables — no file upload or DNS change needed.</span></span></li>
       </ul>
     </section>
 
@@ -1155,8 +1156,9 @@ Invoke-WebRequest -Uri &quot;https://raw.githubusercontent.com/demre/nextjs-site
             <tr><td><strong>Meta description</strong></td><td>The grey summary line under your site's name in Google's results. Comes from <code>description</code> in <code>src/config/site.ts</code>.</td></tr>
             <tr><td><strong>Open Graph / OG image</strong></td><td>The picture-and-title card that appears when a link to your site is shared on WhatsApp, LinkedIn, Slack or Facebook.</td></tr>
             <tr><td><strong>Canonical URL</strong></td><td>The one official address for a page. It stops search engines treating <code>www.yoursite.com</code> and <code>yoursite.com</code> as two rival copies competing with each other.</td></tr>
-            <tr><td><strong>Structured data</strong></td><td>Business facts — address, phone, opening hours — written in a format Google reads directly, rather than having to guess at from the page text.</td></tr>
-            <tr><td><strong>Google Search Console</strong></td><td>A free Google tool showing what your site looks like from Google's side: which pages are indexed, which searches bring people in, and what's going wrong.</td></tr>
+            <tr><td><strong>Structured data</strong></td><td>Business facts — address, phone, opening hours, breadcrumb trail — written in a format Google reads directly, rather than having to guess at from the page text.</td></tr>
+            <tr><td><strong>Breadcrumbs</strong></td><td>The "Home / Contact" trail near the top of a nested page, both as something visitors can click and as structured data telling Google how the page fits into the rest of the site.</td></tr>
+            <tr><td><strong>Google Search Console</strong></td><td>A free Google tool showing what your site looks like from Google's side: which pages are indexed, which searches bring people in, and what's going wrong. Verify ownership with the "HTML tag" method and <code>NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION</code>.</td></tr>
             <tr><td><strong>Favicon</strong></td><td>The tiny icon in the browser tab and in bookmarks.</td></tr>
           </tbody>
         </table>
